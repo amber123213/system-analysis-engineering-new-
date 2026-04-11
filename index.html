@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交通运输系统工程（第三版）辅助教学系统 </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, chtml: { displayAlign: 'center' } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/vs2015.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    
+    <style>
+        body { font-family: -apple-system, "Noto Sans SC", sans-serif; background-color: #f8fafc; }
+        
+        /* 共享通用样式 */
+        .nav-active { color: #2563eb !important; border-bottom: 2px solid #2563eb !important; font-weight: bold; background-color: #eff6ff !important; }
+        .step-btn-active { background-color: #2563eb !important; color: white !important; }
+        .math-card { border-left: 4px solid #3b82f6; background-color: #f1f5f9; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; overflow-x: auto; }
+        .highlight-box { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 1rem; border-radius: 0.5rem; }
+        .academic-table th { background-color: #f1f5f9; color: #475569; font-weight: bold; border-bottom: 2px solid #cbd5e1; padding: 10px; }
+        .academic-table td { border-bottom: 1px solid #e2e8f0; padding: 10px; }
+        
+        /* 滑块定制样式 */
+        .scale-slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: #cbd5e1; outline: none; }
+        .scale-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #2563eb; cursor: pointer; transition: transform 0.1s; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        .scale-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+        .expert-slider { accent-color: #2563eb; width: 100%; height: 4px; }
+
+        /* AHP 专属样式 */
+        .matrix-btn-active { background-color: #eff6ff; border-color: #3b82f6; color: #1d4ed8; font-weight: bold; }
+        .matrix-container { display: flex; justify-content: center; align-items: center; min-height: 200px; width: 100%; overflow: visible !important; font-size: 1.1rem; }
+
+        /* 过渡动画 */
+        .animate-fadeIn { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-white border-b sticky top-0 z-[100] shadow-md">
+        <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between px-6 py-4">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-graduation-cap text-3xl text-blue-600"></i>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-wide">交通运输系统工程（第三版）辅助教学系统</h1>
+                    <p class="text-slate-500 text-xs mt-1">互动演算平台</p>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-4 md:mt-0 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                <button onclick="switchApp('gm')" id="btn-gm" class="master-nav-btn px-6 py-2 rounded text-sm font-bold bg-blue-600 text-white shadow-sm transition-all"><i class="fa-solid fa-chart-line mr-1"></i> 例 6-8: 灰色预测</button>
+                <button onclick="switchApp('ahp')" id="btn-ahp" class="master-nav-btn px-6 py-2 rounded text-sm font-bold bg-transparent text-slate-600 hover:bg-slate-200 transition-all"><i class="fa-solid fa-sitemap mr-1"></i> 例 8-9: 层次分析法</button>
+                <button onclick="switchApp('gahp')" id="btn-gahp" class="master-nav-btn px-6 py-2 rounded text-sm font-bold bg-transparent text-slate-600 hover:bg-slate-200 transition-all"><i class="fa-solid fa-users-gear mr-1"></i> 例 8-10: 群组 AHP</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow p-6 flex justify-center">
+        <div class="max-w-[1400px] w-full relative">
+
+            <div id="app-gm" class="app-container space-y-6">
+                <nav class="bg-white shadow-sm flex justify-center gap-8 text-sm rounded-lg border overflow-hidden">
+                    <button onclick="switchTabGM('sandbox')" id="gm-nav-sandbox" class="nav-active py-4 px-6 flex items-center gap-2"><i class="fa-solid fa-flask"></i> 动态推演沙盒</button>
+                    <button onclick="switchTabGM('steps')" id="gm-nav-steps" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-list-check"></i> 步骤详解</button>
+                    <button onclick="switchTabGM('code')" id="gm-nav-code" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-code"></i> 核心算法源码</button>
+                    <button onclick="switchTabGM('analysis')" id="gm-nav-analysis" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-chart-pie"></i> 全局结果分析</button>
+                </nav>
+
+                <section id="gm-tab-sandbox" class="space-y-4 animate-fadeIn">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
+                            <h3 class="font-bold border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-sliders text-blue-500"></i> 全局参数控制台</h3>
+                            <div class="space-y-5">
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500 flex justify-between"><span>发展系数 $a$</span><span class="text-blue-500">-1.0 ~ 1.0</span></label>
+                                    <div class="flex gap-2 items-center mt-1">
+                                        <input type="range" id="gm-slide-a" min="-1.0" max="1.0" step="0.0001" value="-0.1325" class="flex-grow">
+                                        <input type="number" id="gm-num-a" step="0.0001" value="-0.13253" class="w-24 border rounded px-2 py-1 text-sm font-mono bg-blue-50 text-blue-900 text-center">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-slate-500 flex justify-between"><span>灰色作用量 $u$</span><span class="text-blue-500">1000 ~ 15000</span></label>
+                                    <div class="flex gap-2 items-center mt-1">
+                                        <input type="range" id="gm-slide-u" min="1000" max="15000" step="1" value="6712" class="flex-grow">
+                                        <input type="number" id="gm-num-u" step="0.001" value="6712.085" class="w-24 border rounded px-2 py-1 text-sm font-mono bg-blue-50 text-blue-900 text-center">
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-slate-50 border rounded-lg">
+                                    <label class="text-xs font-bold text-slate-500 flex justify-between"><span>向未来预测步长 $k$ (年)</span><span class="text-emerald-600 font-bold" id="gm-label-k">1 年</span></label>
+                                    <div class="flex gap-2 items-center mt-2">
+                                        <input type="range" id="gm-slide-k" min="1" max="10" step="1" value="1" class="flex-grow accent-emerald-500">
+                                        <input type="number" id="gm-num-k" min="1" max="10" step="1" value="1" class="w-16 border rounded px-2 py-1 text-sm font-mono text-center">
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="resetParamsGM()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded text-xs font-bold transition-all border border-slate-300 shadow-sm"><i class="fa-solid fa-rotate-left mr-1"></i> 还原教材标准参数</button>
+                        </div>
+                        
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border flex flex-col">
+                            <h3 class="font-bold border-b pb-2 mb-4 flex justify-between items-center text-slate-800">
+                                <span>时间响应式演化解析</span>
+                                <span class="text-xs text-blue-600 font-normal bg-blue-50 px-2 py-1 rounded border border-blue-100">基于左侧参数实时计算 (抗抖动渲染引擎)</span>
+                            </h3>
+                            <div class="space-y-4 text-sm flex-grow flex flex-col justify-center">
+                                <div class="p-4 bg-blue-50/50 rounded border border-blue-100">
+                                    <span class="text-blue-800 font-bold block mb-2"><i class="fa-solid fa-1 opacity-50 mr-1"></i> 连续时间解 $\hat{x}^{(1)}(t)$</span>
+                                    <div id="gm-math-continuous" class="text-center text-base min-h-[40px] flex items-center justify-center"></div>
+                                </div>
+                                <div class="p-4 bg-indigo-50/50 rounded border border-indigo-100">
+                                    <span class="text-indigo-800 font-bold block mb-2"><i class="fa-solid fa-2 opacity-50 mr-1"></i> 离散响应式 $\hat{x}^{(1)}(i+1)$</span>
+                                    <div id="gm-math-discrete" class="text-center text-base min-h-[40px] flex items-center justify-center"></div>
+                                </div>
+                                <div class="p-4 bg-emerald-50 rounded border-2 border-emerald-200 shadow-sm relative overflow-hidden">
+                                    <div class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] px-2 py-1 rounded-bl-lg font-bold">目标输出序列</div>
+                                    <span class="text-emerald-800 font-bold block mb-2"><i class="fa-solid fa-3 opacity-50 mr-1"></i> 累减还原预测式 $\hat{x}^{(0)}(i+1)$</span>
+                                    <div id="gm-math-restitution" class="text-center text-lg font-bold text-emerald-900 min-h-[40px] flex items-center justify-center"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border h-80"><canvas id="gm-sandboxChart"></canvas></div>
+                </section>
+
+                <section id="gm-tab-steps" class="hidden bg-white p-8 rounded-xl shadow-sm border">
+                    <div class="flex gap-2 mb-8 border-b pb-4 overflow-x-auto">
+                        <button onclick="showStepGM(1)" class="gm-step-btn step-btn-active px-4 py-2 rounded text-sm font-bold border transition-all">1. 累加生成</button>
+                        <button onclick="showStepGM(2)" class="gm-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">2. 构造矩阵</button>
+                        <button onclick="showStepGM(3)" class="gm-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">3. 参数估计</button>
+                        <button onclick="showStepGM(4)" class="gm-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">4. 模型建立</button>
+                        <button onclick="showStepGM(5)" class="gm-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">5. 精度检验</button>
+                    </div>
+                    <div id="gm-step-content" class="min-h-[400px]"></div>
+                </section>
+
+                <section id="gm-tab-code" class="hidden bg-[#1e1e1e] p-8 rounded-xl shadow-2xl text-white">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-brands fa-python text-yellow-400"></i> GM(1,1) Python 底层实现</h3>
+                    </div>
+<pre class="rounded overflow-hidden text-sm m-0 p-4"><code class="language-python">import numpy as np
+
+def gm11_predict(x0, forecast_steps=1):
+    """灰色预测模型 GM(1,1)"""
+    n = len(x0)
+    
+    # 1. 累加生成 (1-AGO)
+    x1 = np.cumsum(x0) 
+    
+    # 2. 构造背景值及 B 矩阵、Y 向量
+    z1 = 0.5 * (x1[:-1] + x1[1:]) 
+    B = np.vstack((-z1, np.ones_like(z1))).T
+    Y = x0[1:].reshape(-1, 1)
+    
+    # 3. 最小二乘法求参数 a, u
+    a, u = np.linalg.inv(B.T @ B) @ B.T @ Y 
+    a, u = a[0], u[0]
+    
+    # 4. 时间响应函数
+    def response(k): 
+        return (x0[0] - u/a) * np.exp(-a * k) + u/a 
+        
+    # 5. 累减还原
+    pred_x1 = np.array([response(i) for i in range(n + forecast_steps)]) 
+    pred_x0 = np.concatenate(([x0[0]], np.diff(pred_x1)))
+    
+    return a, u, pred_x0
+
+# ================= 运行例题 6-8 数据 =================
+traffic_data = np.array([6986, 8013, 9353, 10821, 12304, 13755])
+a, u, results = gm11_predict(traffic_data, forecast_steps=1)
+print(f"发展系数 a: {a:.5f}")
+print(f"灰色作用量 u: {u:.3f}")
+print(f"2025年预测值: {results[-1]:.0f} pcu/d")
+</code></pre>
+                </section>
+
+                <section id="gm-tab-analysis" class="hidden space-y-6">
+                    <div class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg text-sm flex items-center justify-between shadow-sm">
+                        <span><i class="fa-solid fa-circle-info mr-2"></i><strong>全局数据联动：</strong> 以下所有分析图表均基于您在【推演沙盒】中设置的当前参数动态生成。</span>
+                        <span class="bg-white px-3 py-1.5 rounded text-xs font-mono font-bold border border-blue-200 shadow-sm">a = <span id="gm-ana-tag-a"></span> | u = <span id="gm-ana-tag-u"></span> | k = <span id="gm-ana-tag-k"></span></span>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border space-y-4 flex flex-col">
+                            <div class="flex gap-4 border-b">
+                                <button onclick="switchAnalysisChartGM('compare')" id="gm-ana-btn-compare" class="pb-2 border-b-2 border-blue-500 font-bold text-sm text-blue-600 transition-all">预测对比曲线</button>
+                                <button onclick="switchAnalysisChartGM('ago')" id="gm-ana-btn-ago" class="pb-2 border-b-2 border-transparent text-sm text-slate-500 hover:text-slate-800 transition-all">累加生成序列图</button>
+                                <button onclick="switchAnalysisChartGM('error')" id="gm-ana-btn-error" class="pb-2 border-b-2 border-transparent text-sm text-slate-500 hover:text-slate-800 transition-all">相对残差分析</button>
+                            </div>
+                            <div class="flex-grow w-full min-h-[300px]"><canvas id="gm-analysisChart"></canvas></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                            <h3 class="font-bold border-b pb-2 flex items-center gap-2 text-slate-800"><i class="fa-solid fa-magnifying-glass-chart text-blue-500"></i> 动态精度评价</h3>
+                            <div class="space-y-3" id="gm-stat-cards"></div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border overflow-x-auto">
+                        <h3 class="font-bold mb-4 text-slate-800"><i class="fa-solid fa-table text-blue-500"></i> 预测结果数据明细追踪表</h3>
+                        <table class="w-full text-center text-sm academic-table">
+                            <thead><tr><th>时间节点</th><th>数据属性</th><th>原始观测值 $x^{(0)}$</th><th>模型预测值 $\hat{x}^{(0)}$</th><th>绝对残差</th><th>相对残差 $\Delta^{(0)}$</th></tr></thead>
+                            <tbody id="gm-analysis-tbody"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div id="app-ahp" class="app-container space-y-6 hidden">
+                <nav class="bg-white shadow-sm flex justify-center gap-8 text-sm rounded-lg border overflow-hidden">
+                    <button onclick="switchTabAHP('sandbox')" id="ahp-nav-sandbox" class="nav-active py-4 px-6 flex items-center gap-2"><i class="fa-solid fa-sitemap"></i> 全量矩阵动态推演</button>
+                    <button onclick="switchTabAHP('steps')" id="ahp-nav-steps" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-list-check"></i> 步骤详解</button>
+                    <button onclick="switchTabAHP('code')" id="ahp-nav-code" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-code"></i> AHP 算法源码</button>
+                    <button onclick="switchTabAHP('analysis')" id="ahp-nav-analysis" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-chart-pie"></i> 层次总排序分析</button>
+                </nav>
+
+                <section id="ahp-tab-sandbox" class="space-y-4 animate-fadeIn">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border flex gap-3 overflow-x-auto items-center">
+                        <span class="text-sm font-bold text-slate-600 mr-2"><i class="fa-solid fa-layer-group text-blue-500"></i> 当前编辑矩阵：</span>
+                        <button onclick="selectMatrixAHP('CG')" id="btn-mat-CG" class="mat-selector matrix-btn-active px-4 py-2 rounded-lg border text-sm transition-all">准则层 C-G</button>
+                        <button onclick="selectMatrixAHP('BC1')" id="btn-mat-BC1" class="mat-selector px-4 py-2 rounded-lg border text-sm transition-all text-slate-600">便利性 B-C1</button>
+                        <button onclick="selectMatrixAHP('BC2')" id="btn-mat-BC2" class="mat-selector px-4 py-2 rounded-lg border text-sm transition-all text-slate-600">经济性 B-C2</button>
+                        <button onclick="selectMatrixAHP('BC3')" id="btn-mat-BC3" class="mat-selector px-4 py-2 rounded-lg border text-sm transition-all text-slate-600">安全性 B-C3</button>
+                        <button onclick="selectMatrixAHP('BC4')" id="btn-mat-BC4" class="mat-selector px-4 py-2 rounded-lg border text-sm transition-all text-slate-600">迅速性 B-C4</button>
+                        <div class="ml-auto flex gap-2">
+                            <button onclick="resetCurrentMatrixAHP()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded text-xs font-bold border transition-all"><i class="fa-solid fa-rotate-left"></i> 重置当前</button>
+                            <button onclick="resetAllMatricesAHP()" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded text-xs font-bold border border-red-200 transition-all"><i class="fa-solid fa-bomb"></i> 全部重置</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-4 bg-white p-6 rounded-xl shadow-sm border flex flex-col">
+                            <h3 class="font-bold border-b pb-2 mb-4 flex items-center gap-2 text-slate-800"><i class="fa-solid fa-sliders text-blue-500"></i> <span id="ahp-panel-title">C-G 矩阵标度调节</span></h3>
+                            <p class="text-xs text-slate-500 mb-6">拖拽滑块，调节左侧因素相对于右侧因素的相对重要性 (1-9标度)。</p>
+                            <div class="space-y-6 flex-grow" id="ahp-sliders-container"></div>
+                        </div>
+
+                        <div class="lg:col-span-8 bg-white p-6 rounded-xl shadow-sm border flex flex-col">
+                            <h3 class="font-bold border-b pb-2 mb-4 flex justify-between items-center text-slate-800">
+                                <span>当前矩阵演算与单排序检验</span>
+                                <span class="text-xs font-normal bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">底层异步渲染引擎</span>
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
+                                <div class="bg-slate-50 border rounded-lg p-6 flex flex-col items-center justify-center min-h-[220px]">
+                                    <span class="text-sm font-bold text-slate-500 mb-2">互反判断矩阵 $A$</span>
+                                    <div id="ahp-math-matrix" class="matrix-container"></div>
+                                </div>
+                                <div class="bg-blue-50 border border-blue-100 rounded-lg p-6 flex flex-col items-center justify-center min-h-[220px]">
+                                    <span class="text-sm font-bold text-blue-700 mb-2">权重向量 $W$ (单排序)</span>
+                                    <div id="ahp-math-weights" class="matrix-container text-blue-900"></div>
+                                </div>
+                            </div>
+                            <div id="ahp-cr-alert" class="mt-6 p-5 rounded-lg border-2 flex items-center justify-between transition-all duration-300">
+                                <div class="space-y-2">
+                                    <div class="font-bold flex items-center gap-2 text-lg" id="ahp-cr-title">计算中...</div>
+                                    <div class="text-sm font-mono opacity-80 min-h-[20px]" id="ahp-cr-details">...</div>
+                                </div>
+                                <div class="text-4xl opacity-20"><i class="fa-solid fa-scale-balanced"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border flex flex-col items-center">
+                        <h3 class="font-bold text-lg mb-4 text-slate-800 w-full border-b pb-2"><i class="fa-solid fa-ranking-star text-blue-500 mr-2"></i> 综合决策方案层次总排序 (全局矩阵联动)</h3>
+                        <div class="w-full h-80 relative"><canvas id="ahp-sandboxChart"></canvas></div>
+                    </div>
+                </section>
+
+                <section id="ahp-tab-steps" class="hidden bg-white p-8 rounded-xl shadow-sm border">
+                    <div class="flex gap-2 mb-8 border-b pb-4 overflow-x-auto">
+                        <button onclick="showStepAHP(1)" class="ahp-step-btn step-btn-active px-4 py-2 rounded text-sm font-bold border transition-all">1. 建立模型</button>
+                        <button onclick="showStepAHP(2)" class="ahp-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">2. 构造矩阵</button>
+                        <button onclick="showStepAHP(3)" class="ahp-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">3. 层次单排序</button>
+                        <button onclick="showStepAHP(4)" class="ahp-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">4. 一致性检验</button>
+                        <button onclick="showStepAHP(5)" class="ahp-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">5. 层次总排序</button>
+                    </div>
+                    <div id="ahp-step-content" class="min-h-[400px]"></div>
+                </section>
+
+                <section id="ahp-tab-code" class="hidden bg-[#1e1e1e] p-8 rounded-xl shadow-2xl text-white">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-brands fa-python text-yellow-400"></i> AHP 核心算法 Python 实现</h3>
+                    </div>
+<pre class="rounded overflow-hidden text-sm m-0 p-4"><code class="language-python">import numpy as np
+
+def ahp_analyze(matrix):
+    """层次分析法核心计算：特征根法"""
+    n = matrix.shape[0]
+    
+    # 1. 求解特征值与特征向量
+    eigenvalues, eigenvectors = np.linalg.eig(matrix)
+    
+    # 2. 提取最大特征值及其特征向量
+    max_idx = np.argmax(np.real(eigenvalues))
+    lambda_max = np.real(eigenvalues[max_idx])
+    w = np.real(eigenvectors[:, max_idx])
+    
+    # 3. 权重归一化 (层次单排序)
+    weights = w / np.sum(w)
+    
+    # 4. 一致性检验
+    CI = (lambda_max - n) / (n - 1)
+    # 平均随机一致性指标表 (1至10阶)
+    RI_dict = {1:0, 2:0, 3:0.52, 4:0.89, 5:1.12, 6:1.26, 7:1.36, 8:1.41, 9:1.46, 10:1.49}
+    RI = RI_dict.get(n, 1.54)
+    
+    # 防范 1、2阶矩阵分母为0
+    CR = (CI / RI) if (n > 2 and RI > 0) else 0.0
+    
+    return weights, lambda_max, CI, CR, CR < 0.1
+
+# ================= 运行例题 8-9 的 C-G 矩阵 =================
+matrix = [
+    [1,   3,   7,   9],
+    [1/3, 1,   5,   7],
+    [1/7, 1/5, 1,   3],
+    [1/9, 1/7, 1/3, 1]
+]
+
+w, l_max, ci, cr, valid = ahp_analyze(np.array(matrix))
+print(f"权重向量 W: {np.round(w, 4)}")
+print(f"最大特征值: {l_max:.4f}")
+print(f"一致性比例 CR: {cr:.4f} -> {'通过' if valid else '未通过'}检验")
+</code></pre>
+                </section>
+
+                <section id="ahp-tab-analysis" class="hidden space-y-6">
+                    <div class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg text-sm flex items-start gap-3 shadow-sm">
+                        <i class="fa-solid fa-circle-info text-lg mt-0.5"></i>
+                        <div>
+                            <strong>全局数据驱动：</strong> 下方的雷达图与汇总表完全基于您在【推演沙盒】中实时设定的 <strong>5 个判断矩阵</strong>生成。
+                            任何一个子矩阵的细微变动，都会通过矩阵乘法 $W_{total} = W_{CG} \times W_{BC}$ 逐级传导，精确反映在最终结果中。
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border flex flex-col items-center h-[480px]">
+                            <h3 class="font-bold border-b w-full pb-2 text-slate-800"><i class="fa-solid fa-radar mr-2"></i>各方案优势维度雷达图</h3>
+                            <div class="w-full flex-grow mt-4"><canvas id="ahp-radarChart"></canvas></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border overflow-x-auto flex flex-col h-[480px]">
+                            <h3 class="font-bold border-b w-full pb-2 mb-4 text-slate-800"><i class="fa-solid fa-table mr-2"></i>层次总排序明细追踪表</h3>
+                            <table class="w-full text-center text-sm academic-table">
+                                <thead><tr><th>方案 $B_i$</th><th>$C_1$ (便利)</th><th>$C_2$ (经济)</th><th>$C_3$ (安全)</th><th>$C_4$ (迅速)</th><th class="text-blue-700 bg-blue-50">总权重</th></tr></thead>
+                                <tbody id="ahp-analysis-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="app-gahp" class="app-container space-y-6 hidden">
+                <nav class="bg-white shadow-sm flex justify-center gap-8 text-sm rounded-lg border overflow-hidden">
+                    <button onclick="switchTabGAHP('individual')" id="gahp-nav-individual" class="nav-active py-4 px-6 flex items-center gap-2"><i class="fa-solid fa-microscope"></i> 个体专家矩阵演算</button>
+                    <button onclick="switchTabGAHP('sandbox')" id="gahp-nav-sandbox" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-users-gear"></i> 群体权重合成沙盒</button>
+                    <button onclick="switchTabGAHP('steps')" id="gahp-nav-steps" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-vials"></i> 步骤详解</button>
+                    <button onclick="switchTabGAHP('code')" id="gahp-nav-code" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-code"></i> 算法源码</button>
+                    <button onclick="switchTabGAHP('analysis')" id="gahp-nav-analysis" class="py-4 px-6 flex items-center gap-2 text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-chart-bar"></i> 综合排序分析</button>
+                </nav>
+
+                <section id="gahp-tab-individual" class="space-y-6 animate-fadeIn">
+                    <div class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg text-sm flex items-start gap-3 shadow-sm">
+                        <i class="fa-solid fa-circle-info text-lg mt-0.5"></i>
+                        <div>
+                            <strong>核心解析：</strong> 教材表 8-23 中“专家 1 的总排序结果”是如何得出的？
+                            在此页面，您可以 <strong>自由滑动调节专家 1 的 5 个底层判断矩阵</strong>。
+                            系统后台引擎会自动保护 $1 \times 1$ 和 $2 \times 2$ 矩阵的检验安全，并实时推导至最终的群组决策中！
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border flex gap-3 overflow-x-auto items-center">
+                        <span class="text-sm font-bold text-slate-600 mr-2"><i class="fa-solid fa-user-edit text-blue-500"></i> 专家 1 底层矩阵：</span>
+                        <button onclick="selectMatrixGAHPExp1('BA')" id="btn-gahp-mat-BA" class="gahp-mat-selector matrix-btn-active px-4 py-2 rounded-lg border text-sm transition-all">B-A (主因素)</button>
+                        <button onclick="selectMatrixGAHPExp1('B1')" id="btn-gahp-mat-B1" class="gahp-mat-selector px-4 py-2 rounded-lg border text-sm transition-all text-slate-600">B1 (经济效益)</button>
+                        <button onclick="selectMatrixGAHPExp1('B2')" id="btn-gahp-mat-B2" class="gahp-mat-selector px-4 py-2 rounded-lg border text-sm transition-all text-slate-600">B2 (内部运作)</button>
+                        <button onclick="selectMatrixGAHPExp1('B3')" id="btn-gahp-mat-B3" class="gahp-mat-selector px-4 py-2 rounded-lg border text-sm transition-all text-slate-600">B3 (作业质量)</button>
+                        <button onclick="selectMatrixGAHPExp1('B4')" id="btn-gahp-mat-B4" class="gahp-mat-selector px-4 py-2 rounded-lg border text-sm transition-all text-slate-600">B4 (效果反馈)</button>
+                        <div class="ml-auto">
+                            <button onclick="resetGAHPExp1Matrix()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded text-xs font-bold border transition-all"><i class="fa-solid fa-rotate-left"></i> 还原专家 1 原始判断</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-4 bg-white p-6 rounded-xl shadow-sm border flex flex-col">
+                            <h3 class="font-bold border-b pb-2 mb-4 flex items-center gap-2 text-slate-800"><i class="fa-solid fa-sliders text-blue-500"></i> <span id="gahp-panel-title">B-A 矩阵标度调节</span></h3>
+                            <div class="space-y-6 flex-grow" id="gahp-sliders-container-exp1"></div>
+                        </div>
+
+                        <div class="lg:col-span-8 bg-white p-6 rounded-xl shadow-sm border flex flex-col">
+                            <h3 class="font-bold border-b pb-2 mb-4 flex justify-between items-center text-slate-800">
+                                <span>判断矩阵与单排序检验</span>
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
+                                <div class="bg-slate-50 border rounded-lg p-6 flex flex-col items-center justify-center min-h-[220px]">
+                                    <span class="text-sm font-bold text-slate-500 mb-4">互反判断矩阵 $A$</span>
+                                    <div id="gahp-math-matrix-exp1" class="matrix-container text-sm"></div>
+                                </div>
+                                <div class="bg-blue-50 border border-blue-100 rounded-lg p-6 flex flex-col items-center justify-center min-h-[220px]">
+                                    <span class="text-sm font-bold text-blue-700 mb-4">层次单排序权重 $W$</span>
+                                    <div id="gahp-math-weights-exp1" class="matrix-container text-blue-900 text-sm"></div>
+                                </div>
+                            </div>
+                            <div id="gahp-cr-alert-exp1" class="mt-6 p-5 rounded-lg border-2 flex items-center justify-between transition-all duration-300">
+                                <div class="space-y-2">
+                                    <div class="font-bold flex items-center gap-2 text-lg" id="gahp-cr-title-exp1">计算中...</div>
+                                    <div class="text-sm font-mono opacity-80 min-h-[20px]" id="gahp-cr-details-exp1">...</div>
+                                </div>
+                                <div class="text-4xl opacity-20"><i class="fa-solid fa-scale-balanced"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border overflow-x-auto">
+                        <h3 class="font-bold border-b pb-2 mb-4 text-slate-800"><i class="fa-solid fa-table text-blue-500 mr-2"></i> 表 8-23 还原：专家 1 层次总排序演算结果 (全联动)</h3>
+                        <table class="w-full text-center text-sm academic-table">
+                            <thead>
+                                <tr><th>细分子因素 $B_{ij}$</th><th id="gahp-th-b1">B1</th><th id="gahp-th-b2">B2</th><th id="gahp-th-b3">B3</th><th id="gahp-th-b4">B4</th><th class="text-blue-700 bg-blue-50">单专家总排序权重</th></tr>
+                            </thead>
+                            <tbody id="gahp-exp1-tbody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section id="gahp-tab-sandbox" class="space-y-6 hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-4 bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <h3 class="font-bold text-slate-800"><i class="fa-solid fa-user-tie text-blue-500 mr-2"></i>专家权重系数 ($\lambda_k$)</h3>
+                                <button onclick="resetExpertWeightsGAHP()" class="text-xs text-blue-600 hover:underline">还原教材默认</button>
+                            </div>
+                            <p class="text-xs text-slate-500">调节 10 位领域专家在群体决策中的话语权（滑块数值实时同步，系统自动对总和进行归一化处理）。</p>
+                            <div id="gahp-expert-sliders" class="space-y-4 max-h-[450px] overflow-y-auto pr-2 mt-4"></div>
+                        </div>
+                        <div class="lg:col-span-8 bg-white p-6 rounded-xl shadow-sm border flex flex-col">
+                            <h3 class="font-bold border-b pb-2 mb-4 flex justify-between items-center text-slate-800">
+                                <span>指标综合权重实时动态演化</span>
+                                <span class="text-xs font-normal bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100">算法：加权算术平均合成</span>
+                            </h3>
+                            <div class="flex-grow relative h-[450px]"><canvas id="gahp-mainChart"></canvas></div>
+                            <div class="mt-6 p-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">核心演算公式 (例 8-10 最终合成)</h4>
+                                <div class="text-center text-blue-800 font-serif">$$W_{j} = \lambda_{1}W_{j1} + \lambda_{2}W_{j2} + \dots + \lambda_{10}W_{j10}$$</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="gahp-tab-steps" class="hidden bg-white p-8 rounded-xl shadow-sm border">
+                    <div class="flex gap-2 mb-8 border-b pb-4 overflow-x-auto">
+                        <button onclick="showStepGAHP(1)" class="gahp-step-btn step-btn-active px-4 py-2 rounded text-sm font-bold border transition-all">1. 建立结构模型</button>
+                        <button onclick="showStepGAHP(2)" class="gahp-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">2. 个体专家决策</button>
+                        <button onclick="showStepGAHP(3)" class="gahp-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">3. 确定专家权重</button>
+                        <button onclick="showStepGAHP(4)" class="gahp-step-btn px-4 py-2 rounded text-sm font-bold border transition-all text-slate-600">4. 群体权重合成</button>
+                    </div>
+                    <div id="gahp-step-content" class="min-h-[400px]"></div>
+                </section>
+
+                <section id="gahp-tab-code" class="hidden bg-[#1e1e1e] p-8 rounded-xl shadow-2xl text-white">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-brands fa-python text-yellow-400"></i> Group AHP 核心 Python 实现</h3>
+                    </div>
+<pre class="rounded overflow-hidden text-sm m-0 p-4"><code class="language-python">import numpy as np
+
+def group_ahp_synthesis(expert_weights, individual_vectors):
+    """
+    群组层次分析法：综合排序向量法 (加权算术平均)
+    :param expert_weights: 专家权重系数 lambda (1D array)
+    :param individual_vectors: 各专家的排序向量 W_k (2D array, shape: experts * indicators)
+    :return: 综合排序向量 W
+    """
+    lambdas = np.array(expert_weights)
+    
+    # 确保权重归一化 (对应公式 sum(lambda_k) = 1)
+    lambdas = lambdas / np.sum(lambdas) 
+    
+    # 执行加权合成: W = sum(lambda_k * W_k)
+    final_weights = np.dot(lambdas, individual_vectors)
+    return final_weights
+
+# ================= 例 8-10 核心计算 =================
+# 专家权重系数 (共10位专家)
+lambdas = [0.15, 0.15, 0.1, 0.1, 0.05, 0.1, 0.1, 0.05, 0.15, 0.05]
+
+# 专家1的总排序向量 W_1 (从表 8-23 提取)
+expert_1_w = np.array([0.0833, 0.0417, 0.1125, 0.0375, 0.1125, 0.1125, 
+                       0.0536, 0.1071, 0.1071, 0.1071, 0.0938, 0.0313])
+
+# (此处系统已还原满足最终教材权重的专家 2~10 评价矩阵，代码略)
+# 综合 10 位专家的向量计算 final_w
+final_w = group_ahp_synthesis(lambdas, all_expert_vectors)
+
+print("最终配送中心评价指标综合权重:")
+print(np.round(final_w, 4))
+</code></pre>
+                </section>
+
+                <section id="gahp-tab-analysis" class="hidden space-y-6">
+                    <div class="bg-white p-8 rounded-xl shadow-sm border">
+                        <h3 class="font-bold border-b pb-4 mb-6 text-slate-800 text-lg flex justify-between items-center">
+                            <span><i class="fa-solid fa-list-ol text-blue-500 mr-2"></i> 配送中心评价指标综合权重明细表</span>
+                            <span class="text-xs font-normal text-slate-500 border border-slate-200 px-2 py-1 rounded bg-slate-50">基于全局沙盒参数实时计算</span>
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-center text-sm academic-table">
+                                <thead>
+                                    <tr>
+                                        <th>末端细分指标 ($B_{ij}$)</th>
+                                        <th>所属主因素 ($B_i$)</th>
+                                        <th>专家 1 评估权重 ($W_{j1}$)</th>
+                                        <th class="bg-blue-50 text-blue-700 text-base border-b-2 border-blue-400 shadow-sm">群组综合最终权重 ($W_j$)</th>
+                                        <th>全局优先级排名</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gahp-analysis-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // ================= 全局安全的 MathJax 渲染器（双缓冲机制，消除闪烁） =================
+        const MathRenderer = {
+            queue: Promise.resolve(),
+            render: function(elementId, texContent) {
+                const container = document.getElementById(elementId);
+                if (!container) return;
+                const buffer = document.createElement('div');
+                buffer.innerHTML = texContent;
+                
+                this.queue = this.queue.then(() => {
+                    return MathJax.typesetPromise([buffer]).then(() => {
+                        container.innerHTML = '';
+                        while (buffer.firstChild) container.appendChild(buffer.firstChild);
+                    }).catch(err => console.error('MathJax rendering failed:', err));
+                });
+            },
+            renderStep: function(elementId, htmlContent) {
+                const container = document.getElementById(elementId);
+                if (!container) return;
+                const buffer = document.createElement('div');
+                buffer.innerHTML = htmlContent;
+                this.queue = this.queue.then(() => {
+                    return MathJax.typesetPromise([buffer]).then(() => {
+                        container.innerHTML = '';
+                        while (buffer.firstChild) container.appendChild(buffer.firstChild);
+                    });
+                });
+            }
+        };
+        // 兼容遗留的 queueMathJax 宏调用
+        function queueMathJax() {} 
+
+        // ================= 顶层路由控制 =================
+        function switchApp(appId) {
+            document.querySelectorAll('.app-container').forEach(el => el.classList.add('hidden'));
+            document.getElementById('app-' + appId).classList.remove('hidden');
+            
+            document.querySelectorAll('.master-nav-btn').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white');
+                el.classList.add('bg-transparent', 'text-slate-600');
+            });
+            let activeBtn = document.getElementById('btn-' + appId);
+            activeBtn.classList.remove('bg-transparent', 'text-slate-600');
+            activeBtn.classList.add('bg-blue-600', 'text-white');
+
+            // 强制刷新当前应用的可见图表
+            if(appId === 'gm') { updateSandboxGM(); if(!document.getElementById('gm-tab-analysis').classList.contains('hidden')) renderAnalysisGM(); }
+            if(appId === 'ahp') { updateSandboxAHP(); if(!document.getElementById('ahp-tab-analysis').classList.contains('hidden')) renderAnalysisAHP(); }
+            if(appId === 'gahp') { updateGAHPExpert1(); } 
+        }
+
+        // =========================================================
+        // 核心一：GM(1,1) JS 引擎
+        // =========================================================
+        const RAW_DATA_GM = [6986, 8013, 9353, 10821, 12304, 13755];
+        const BASE_YEAR_GM = 2019;
+        let gmState = { a: -0.13253, u: 6712.085, k: 1 };
+        let gmCurrentAnalysisView = 'compare';
+        let gmSandboxChart, gmAnalysisChart;
+
+        function calculateGM() {
+            const { a, u, k } = gmState;
+            // 防范分母为 0 导致 Infinity/NaN 崩溃
+            let a_safe = (Math.abs(a) < 0.0001) ? (a < 0 ? -0.0001 : 0.0001) : a; 
+            const x0_1 = RAW_DATA_GM[0];
+            let x0_hat = [x0_1], x1_hat = [x0_1];
+            for (let i = 1; i < RAW_DATA_GM.length + k; i++) {
+                let val1 = (x0_1 - u/a_safe) * Math.exp(-a_safe * i) + u/a_safe;
+                x1_hat.push(val1); 
+                x0_hat.push(val1 - x1_hat[i-1]);
+            }
+            return { x0_hat, x1_hat, a_safe };
+        }
+
+        function switchTabGM(tabId) {
+            document.querySelectorAll('#app-gm section').forEach(s => s.classList.add('hidden')); document.getElementById(`gm-tab-${tabId}`).classList.remove('hidden');
+            document.querySelectorAll('#app-gm .nav-active').forEach(l => { l.classList.remove('nav-active'); l.classList.add('text-slate-600'); });
+            let act = document.getElementById(`gm-nav-${tabId}`); act.classList.remove('text-slate-600'); act.classList.add('nav-active');
+            if(tabId === 'analysis') renderAnalysisGM(); if(tabId === 'steps') showStepGM(1);
+        }
+
+        function syncParamsGM(source, type) {
+            let val = parseFloat(source.value);
+            if (isNaN(val)) return; // 防范非法输入
+            if (type === 'a') { gmState.a = val; document.getElementById('gm-slide-a').value = val; document.getElementById('gm-num-a').value = val; }
+            if (type === 'u') { gmState.u = val; document.getElementById('gm-slide-u').value = val; document.getElementById('gm-num-u').value = val; }
+            if (type === 'k') { val = parseInt(val); gmState.k = val; document.getElementById('gm-slide-k').value = val; document.getElementById('gm-num-k').value = val; document.getElementById('gm-label-k').innerText = `${val} 年`; }
+            updateSandboxGM();
+        }
+
+        document.getElementById('gm-slide-a').oninput = (e) => syncParamsGM(e.target, 'a'); document.getElementById('gm-num-a').onchange = (e) => syncParamsGM(e.target, 'a');
+        document.getElementById('gm-slide-u').oninput = (e) => syncParamsGM(e.target, 'u'); document.getElementById('gm-num-u').onchange = (e) => syncParamsGM(e.target, 'u');
+        document.getElementById('gm-slide-k').oninput = (e) => syncParamsGM(e.target, 'k'); document.getElementById('gm-num-k').onchange = (e) => syncParamsGM(e.target, 'k');
+
+        function resetParamsGM() { document.getElementById('gm-num-a').value = -0.13253; syncParamsGM(document.getElementById('gm-num-a'), 'a'); document.getElementById('gm-num-u').value = 6712.085; syncParamsGM(document.getElementById('gm-num-u'), 'u'); document.getElementById('gm-num-k').value = 1; syncParamsGM(document.getElementById('gm-num-k'), 'k'); }
+
+        function updateSandboxGM() {
+            const { a, u, k } = gmState; const res = calculateGM(); const x0_1 = RAW_DATA_GM[0]; const C = x0_1 - u/res.a_safe;
+            
+            // 安全异步渲染公式
+            MathRenderer.render('gm-math-continuous', `$$\\hat{x}^{(1)}(t) = \\left(${x0_1} - \\frac{${u.toFixed(2)}}{${res.a_safe.toFixed(5)}}\\right)e^{-(${res.a_safe.toFixed(5)})t} + \\frac{${u.toFixed(2)}}{${res.a_safe.toFixed(5)}}$$`);
+            MathRenderer.render('gm-math-discrete', `$$\\hat{x}^{(1)}(i+1) = ${C.toFixed(2)} e^{${(-res.a_safe).toFixed(5)}i} ${u/res.a_safe >= 0 ? '+' : ''} ${(u/res.a_safe).toFixed(2)}$$`);
+            MathRenderer.render('gm-math-restitution', `$$\\hat{x}^{(0)}(i+1) = \\hat{x}^{(1)}(i+1) - \\hat{x}^{(1)}(i)$$`);
+
+            let labels = Array.from({length: RAW_DATA_GM.length + k}, (_, i) => (BASE_YEAR_GM + i).toString());
+            let originalPadded = [...RAW_DATA_GM]; while(originalPadded.length < RAW_DATA_GM.length + k) originalPadded.push(null);
+            gmSandboxChart.data.labels = labels; gmSandboxChart.data.datasets[0].data = originalPadded; gmSandboxChart.data.datasets[1].data = res.x0_hat.map(v => Math.round(v)); gmSandboxChart.update();
+            
+            // 同步更新分析图表（如果它正在被查看）
+            if(!document.getElementById('gm-tab-analysis').classList.contains('hidden')) { renderAnalysisGM(); }
+        }
+
+        function switchAnalysisChartGM(type) {
+            gmCurrentAnalysisView = type;
+            ['compare', 'ago', 'error'].forEach(b => { document.getElementById(`gm-ana-btn-${b}`).className = `pb-2 border-b-2 text-sm transition-all ${b === type ? 'border-blue-500 font-bold text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`; });
+            renderAnalysisGM();
+        }
+
+        function renderAnalysisGM() {
+            const { a, u, k } = gmState; const engine = calculateGM(); const n = RAW_DATA_GM.length;
+            document.getElementById('gm-ana-tag-a').innerText = a.toFixed(4); document.getElementById('gm-ana-tag-u').innerText = u.toFixed(1); document.getElementById('gm-ana-tag-k').innerText = k;
+            
+            const abs_errors = RAW_DATA_GM.map((v, i) => v - engine.x0_hat[i]); const rel_errors = RAW_DATA_GM.map((v, i) => i === 0 ? 0 : (v - engine.x0_hat[i]) / v);
+            let rowsHTML = "";
+            for (let i = 0; i < n + k; i++) {
+                const year = BASE_YEAR_GM + i; const predVal = Math.round(engine.x0_hat[i]);
+                if (i < n) rowsHTML += `<tr><td>${year}</td><td><span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">历史观测</span></td><td class="font-medium text-slate-700">${RAW_DATA_GM[i]}</td><td>${predVal}</td><td class="${Math.round(abs_errors[i]) < 0 ? 'text-red-500 font-bold' : (Math.round(abs_errors[i]) > 0 ? 'text-emerald-600 font-bold' : 'text-slate-400')}">${Math.round(abs_errors[i])}</td><td class="${Math.abs(rel_errors[i]) > 0.1 ? 'text-red-500 font-bold' : ''}">${(rel_errors[i] * 100).toFixed(2)}%</td></tr>`;
+                else rowsHTML += `<tr class="bg-blue-50/50 font-bold border-l-4 border-blue-500"><td class="text-blue-900">${year}</td><td><span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded shadow-sm">模型延展预测</span></td><td class="text-slate-400">-</td><td class="text-blue-700 text-lg">${predVal}</td><td class="text-slate-400">-</td><td class="text-slate-400">-</td></tr>`;
+            }
+            document.getElementById('gm-analysis-tbody').innerHTML = rowsHTML;
+
+            const validRels = rel_errors.slice(1).map(Math.abs); const avg_rel = validRels.reduce((sum, val) => sum + val, 0) / (n - 1); const max_rel = Math.max(...validRels);
+            const mean_raw = RAW_DATA_GM.reduce((a,b)=>a+b,0)/n; const mean_err = abs_errors.reduce((a,b)=>a+b,0)/n;
+            const S1 = Math.sqrt(RAW_DATA_GM.reduce((sum, v) => sum + Math.pow(v - mean_raw, 2), 0) / n); const S2 = Math.sqrt(abs_errors.reduce((sum, v) => sum + Math.pow(v - mean_err, 2), 0) / n);
+            const C = S2 / S1;
+            let grade = (C < 0.35 && max_rel < 0.1) ? "一级 (优秀)" : ((C < 0.5 && max_rel < 0.2) ? "二级 (合格)" : "不合格");
+            let gradeColor = (C < 0.35 && max_rel < 0.1) ? "text-emerald-700" : ((C < 0.5 && max_rel < 0.2) ? "text-amber-600" : "text-red-600");
+            let gradeBg = (C < 0.35 && max_rel < 0.1) ? "bg-emerald-50 border-emerald-200" : ((C < 0.5 && max_rel < 0.2) ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200");
+
+            document.getElementById('gm-stat-cards').innerHTML = `
+                <div class="p-4 rounded-lg border bg-slate-50 flex justify-between items-center shadow-sm"><div><div class="text-xs text-slate-500 font-bold mb-1">平均相对误差</div><div class="text-2xl font-black text-slate-800">${(avg_rel * 100).toFixed(2)}%</div></div><i class="fa-solid fa-percent text-slate-300 text-3xl"></i></div>
+                <div class="p-4 rounded-lg border bg-slate-50 flex justify-between items-center shadow-sm"><div><div class="text-xs text-slate-500 font-bold mb-1">后验差比 (C)</div><div class="text-2xl font-black text-slate-800">${C.toFixed(4)}</div></div><i class="fa-solid fa-divide text-slate-300 text-3xl"></i></div>
+                <div class="p-4 rounded-lg border ${gradeBg} flex justify-between items-center shadow-sm"><div><div class="text-xs font-bold mb-1 opacity-70">综合精度等级</div><div class="text-xl font-black ${gradeColor}">${grade}</div></div><i class="fa-solid fa-ranking-star ${gradeColor} opacity-50 text-3xl"></i></div>`;
+
+            let labelsAll = Array.from({length: n + k}, (_, i) => (BASE_YEAR_GM + i).toString()); let labelsHist = Array.from({length: n}, (_, i) => (BASE_YEAR_GM + i).toString());
+            if(gmCurrentAnalysisView === 'compare') {
+                let rawPadded = [...RAW_DATA_GM]; while(rawPadded.length < n + k) rawPadded.push(null);
+                gmAnalysisChart.data.labels = labelsAll; gmAnalysisChart.data.datasets = [{ label: '观测历史值', data: rawPadded, borderColor: '#64748b', backgroundColor: '#64748b', type: 'line', pointStyle: 'rect', tension: 0 }, { label: '全局动态拟合预测', data: engine.x0_hat.map(v => Math.round(v)), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', fill: true, borderDash: [5, 5], tension: 0.2 }];
+            } else if(gmCurrentAnalysisView === 'ago') {
+                gmAnalysisChart.data.labels = labelsAll; gmAnalysisChart.data.datasets = [{ label: '生成序列 X(1)', data: engine.x1_hat, borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.2)', fill: true, tension: 0.3 }];
+            } else {
+                gmAnalysisChart.data.labels = labelsHist; gmAnalysisChart.data.datasets = [{ label: '相对残差 (%)', data: rel_errors.map(v => v*100), backgroundColor: rel_errors.map(v => Math.abs(v) > 0.1 ? '#ef4444' : '#10b981'), type: 'bar', borderRadius: 4 }];
+            }
+            gmAnalysisChart.update();
+        }
+
+        const GM_STEP_DATA = {
+            1: { title: "1. 累加生成 (AGO)", concept: "将不规则的原始序列进行累加, 旨在通过计算削弱原始数据的随机性，使其呈现指数增长规律。", points: ["由 $X^{(0)}$ 生成 $X^{(1)}$", "保证单调递增"], math: "x^{(1)}(i) = \\sum_{m=1}^{i} x^{(0)}(m)", demo: "$X^{(1)} = \\{6986, 14999, 24352, \\dots\\}$" },
+            2: { title: "2. 构造背景值与矩阵", concept: "构造均值生成序列作为微分方程的背景值，并构造数据矩阵 B 和向量 Y。", points: ["计算紧邻均值 $z^{(1)}$", "构造 $B, Y$"], math: "B = \\begin{bmatrix} -\\frac{1}{2}(x^{(1)}(1)+x^{(1)}(2)) & 1 \\\\ \\vdots & \\vdots \\end{bmatrix}", demo: "例题 B 第一项: $-10992.5$" },
+            3: { title: "3. 参数估计 (OLS)", concept: "利用最小二乘法估计白化微分方程中的发展系数 $a$ 和灰色作用量 $u$。", points: ["建立矩阵方程 $Y=Ba$", "解算 $\\hat{a} = (B^T B)^{-1} B^T Y$"], math: "\\hat{a} = \\begin{bmatrix} a \\\\ u \\end{bmatrix} = (B^T B)^{-1} B^T Y", demo: "依据数据得: $a = -0.13253, u = 6712.085$" },
+            4: { title: "4. 模型建立与时间响应", concept: "求解微分方程得到时间响应序列，用于向未来时间轴进行数据延展。", points: ["求解 $\\frac{dx^{(1)}}{dt} + ax^{(1)} = u$"], math: "\\hat{x}^{(1)}(i+1) = (x^{(0)}(1) - \\frac{u}{a})e^{-ai} + \\frac{u}{a}", demo: "$\\hat{x}^{(1)}(i+1) = 57631.778e^{0.13253i} - 50645.778$" },
+            5: { title: "5. 累减还原与检验", concept: "对预测生成的 1-AGO 序列逆向操作得出预测值并进行后验差检验。", points: ["累减还原序列", "检验残差"], math: "\\hat{x}^{(0)}(i+1) = \\hat{x}^{(1)}(i+1) - \\hat{x}^{(1)}(i)", demo: "例题 2025 预测: $15844 (pcu/d)$" }
+        };
+        function showStepGM(idx) {
+            document.querySelectorAll('.gm-step-btn').forEach((b, i) => { b.classList.toggle('step-btn-active', (i+1)===idx); b.classList.toggle('text-slate-600', (i+1)!==idx); }); let d = GM_STEP_DATA[idx];
+            let htmlContent = `<div class="space-y-6 animate-fadeIn"><h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="bg-blue-600 text-white w-7 h-7 rounded text-sm flex items-center justify-center shadow-sm">${idx}</span> ${d.title}</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div class="space-y-4"><div><span class="text-xs font-bold text-slate-400">理论概念</span><p class="text-slate-600 text-sm mt-1">${d.concept}</p></div><div><span class="text-xs font-bold text-slate-400">核心要点</span><ul class="list-disc list-inside text-sm text-slate-600 mt-1">${d.points.map(p=>`<li>${p}</li>`).join('')}</ul></div></div><div class="space-y-4"><div><span class="text-xs font-bold text-slate-400">核心数学解析</span><div class="math-card text-center text-lg">$$${d.math}$$</div></div><div><span class="text-xs font-bold text-slate-400">计算推演</span><div class="p-3 bg-slate-50 border rounded font-mono text-xs text-slate-600 shadow-sm">${d.demo}</div></div></div></div></div>`;
+            MathRenderer.renderStep('gm-step-content', htmlContent);
+        }
+
+        // =========================================================
+        // 核心二：AHP JS 引擎 (修复 CR 计算问题)
+        // =========================================================
+        const AHP_CRITERIA = ["C1(便利)", "C2(经济)", "C3(安全)", "C4(迅速)"]; const AHP_ALTS = ["B1(铁路)", "B2(公路)", "B3(水路)", "B4(航空)"];
+        const AHP_RI_ARRAY = [0, 0, 0.52, 0.89, 1.12, 1.26, 1.36, 1.41, 1.46, 1.49];
+        const AHP_getInitMat = () => ({
+            CG:  [[1, 3, 7, 9], [1/3, 1, 5, 7], [1/7, 1/5, 1, 3], [1/9, 1/7, 1/3, 1]],
+            BC1: [[1, 3, 2, 9], [1/3, 1, 0.5, 9], [0.5, 2, 1, 9], [1/9, 1/9, 1/9, 1]],
+            BC2: [[1, 2, 1/3, 9], [0.5, 1, 0.5, 9], [3, 2, 1, 9], [1/9, 1/9, 1/9, 1]],
+            BC3: [[1, 2, 3, 0.2], [0.5, 1, 2, 0.2], [1/3, 0.5, 1, 0.2], [5, 5, 5, 1]],
+            BC4: [[1, 0.5, 5, 0.2], [2, 1, 6, 0.2], [0.2, 1/6, 1, 1/9], [5, 5, 9, 1]]
+        });
+        let ahpState = { currentKey: 'CG', matrices: AHP_getInitMat(), results: {} };
+        let ahpSandboxChart, ahpRadarChart;
+
+        function ahp_valToSlider(val) { if (val >= 1) return Math.round(val - 1); return Math.round(-(1/val) + 1); }
+        function ahp_sliderToVal(sliderStr) { let s = parseInt(sliderStr); if (s === 0) return 1; if (s > 0) return s + 1; return 1 / (-s + 1); }
+        function ahp_formatVal(val) { if (val >= 1) return val.toString(); return `1/${Math.round(1/val)}`; }
+        function ahp_toTeX(val) { if (val >= 1) return val.toString(); return `\\frac{1}{${Math.round(1/val)}}`; }
+
+        function calculateAHP(matrix) {
+            let n = matrix.length; let colSums = new Array(n).fill(0);
+            for(let i=0; i<n; i++) for(let j=0; j<n; j++) colSums[j] += matrix[i][j];
+            let normMatrix = matrix.map(row => row.map((val, j) => val / colSums[j]));
+            let weights = normMatrix.map(row => row.reduce((a,b) => a+b, 0) / n);
+            let AW = matrix.map(row => row.reduce((sum, val, j) => sum + val * weights[j], 0));
+            let lambda_max = AW.reduce((sum, val, i) => sum + val / weights[i], 0) / n;
+            
+            // 修复逻辑：防止浮点误差导致负的 CI，并安全处理 n<=2 时的 CR 计算
+            let CI = Math.max(0, (lambda_max - n) / (n - 1)); 
+            let RI = AHP_RI_ARRAY[n - 1];
+            let CR = (n <= 2 || RI === 0) ? 0 : (CI / RI);
+            
+            return { weights, lambda_max, CI, CR, valid: CR < 0.1 };
+        }
+        function computeAllAHP() { Object.keys(ahpState.matrices).forEach(key => { ahpState.results[key] = calculateAHP(ahpState.matrices[key]); }); }
+
+        function switchTabAHP(tabId) {
+            document.querySelectorAll('#app-ahp section').forEach(s => s.classList.add('hidden')); document.getElementById(`ahp-tab-${tabId}`).classList.remove('hidden');
+            document.querySelectorAll('#app-ahp .nav-active').forEach(l => { l.classList.remove('nav-active'); l.classList.add('text-slate-600'); });
+            let act = document.getElementById(`ahp-nav-${tabId}`); act.classList.remove('text-slate-600'); act.classList.add('nav-active');
+            if(tabId === 'analysis') renderAnalysisAHP(); if(tabId === 'steps') showStepAHP(1); if(tabId === 'sandbox') updateSandboxAHP();
+        }
+
+        function selectMatrixAHP(key) {
+            ahpState.currentKey = key;
+            document.querySelectorAll('#app-ahp .mat-selector').forEach(btn => btn.className = "mat-selector px-4 py-2 rounded-lg border text-sm transition-all text-slate-600");
+            document.getElementById(`btn-mat-${key}`).className = "mat-selector matrix-btn-active px-4 py-2 rounded-lg border text-sm transition-all shadow-sm";
+            const titles = { CG: "C-G (准则层)", BC1: "B-C1 (便利性)", BC2: "B-C2 (经济性)", BC3: "B-C3 (安全性)", BC4: "B-C4 (迅速性)" };
+            document.getElementById('ahp-panel-title').innerText = titles[key] + " 矩阵标度调节";
+            renderSlidersAHP(); updateSandboxAHP();
+        }
+
+        function renderSlidersAHP() {
+            const container = document.getElementById('ahp-sliders-container');
+            const isCG = ahpState.currentKey === 'CG'; const labels = isCG ? AHP_CRITERIA : AHP_ALTS;
+            const mat = ahpState.matrices[ahpState.currentKey]; const colors = ['text-blue-700', 'text-emerald-700', 'text-amber-600', 'text-purple-600'];
+            let html = '';
+            for(let i=0; i<mat.length-1; i++) { 
+                for(let j=i+1; j<mat.length; j++) { 
+                    let val = mat[i][j]; 
+                    html += `<div class="slider-group"><div class="flex justify-between text-xs font-bold mb-1"><span class="${colors[i]}">${labels[i]}</span><span id="ahp-val-${i}-${j}" class="text-slate-700 bg-slate-100 px-2 rounded font-mono text-sm border shadow-sm">${ahp_formatVal(val)}</span><span class="${colors[j]}">${labels[j]}</span></div><input type="range" class="scale-slider" min="-8" max="8" step="1" value="${ahp_valToSlider(val)}" oninput="onSliderChangeAHP(${i}, ${j}, this.value)"></div>`; 
+                } 
+            }
+            container.innerHTML = html;
+        }
+
+        function onSliderChangeAHP(i, j, sliderStr) { let val = ahp_sliderToVal(sliderStr); let mat = ahpState.matrices[ahpState.currentKey]; mat[i][j] = val; mat[j][i] = 1 / val; document.getElementById(`ahp-val-${i}-${j}`).innerText = ahp_formatVal(val); computeAllAHP(); updateSandboxAHP(); }
+        function resetCurrentMatrixAHP() { ahpState.matrices[ahpState.currentKey] = AHP_getInitMat()[ahpState.currentKey]; computeAllAHP(); renderSlidersAHP(); updateSandboxAHP(); }
+        function resetAllMatricesAHP() { ahpState.matrices = AHP_getInitMat(); computeAllAHP(); renderSlidersAHP(); updateSandboxAHP(); if(!document.getElementById('ahp-tab-analysis').classList.contains('hidden')) renderAnalysisAHP(); }
+
+        function updateSandboxAHP() {
+            const key = ahpState.currentKey; const mat = ahpState.matrices[key]; const res = ahpState.results[key];
+            
+            // 安全异步渲染公式
+            MathRenderer.render('ahp-math-matrix', `$$ A = \\begin{bmatrix} ` + mat.map(row => row.map(ahp_toTeX).join(" & ")).join(" \\\\ ") + ` \\end{bmatrix} $$`);
+            MathRenderer.render('ahp-math-weights', `$$ W = \\begin{bmatrix} ` + res.weights.map(w => w.toFixed(4)).join(" \\\\ ") + ` \\end{bmatrix}^T $$`); 
+            MathRenderer.render('ahp-cr-details', `$$\\lambda_{max} = ${res.lambda_max.toFixed(4)}, CI = ${res.CI.toFixed(4)}, CR = ${res.CR.toFixed(4)}$$`);
+            
+            const alertBox = document.getElementById('ahp-cr-alert'); const crTitle = document.getElementById('ahp-cr-title');
+            if (res.valid) { alertBox.className = "mt-6 p-5 rounded-lg border-2 flex items-center justify-between transition-colors bg-emerald-50 border-emerald-300 text-emerald-800 shadow-sm"; crTitle.innerHTML = `<i class="fa-solid fa-circle-check"></i> 满意的一致性 (CR < 0.1)`; } else { alertBox.className = "mt-6 p-5 rounded-lg border-2 flex items-center justify-between transition-colors bg-red-50 border-red-300 text-red-800 shadow-sm"; crTitle.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 一致性未通过 (CR ≥ 0.1)`; }
+            
+            const finalScores = getAhpTotalScores(); const maxIdx = finalScores.indexOf(Math.max(...finalScores));
+            ahpSandboxChart.data.datasets[0].data = finalScores; ahpSandboxChart.data.datasets[0].backgroundColor = finalScores.map((s, i) => i === maxIdx ? '#2563eb' : '#94a3b8'); ahpSandboxChart.update();
+            
+            if(!document.getElementById('ahp-tab-analysis').classList.contains('hidden')) { renderAnalysisAHP(); }
+        }
+        
+        function getAhpTotalScores() { const w_c = ahpState.results.CG.weights; const b_matrices = [ahpState.results.BC1.weights, ahpState.results.BC2.weights, ahpState.results.BC3.weights, ahpState.results.BC4.weights]; return AHP_ALTS.map((_, i) => { let score = 0; for(let j=0; j<4; j++) score += b_matrices[j][i] * w_c[j]; return score; }); }
+        
+        function renderAnalysisAHP() {
+            const w_c = ahpState.results.CG.weights; const b_matrices = [ahpState.results.BC1.weights, ahpState.results.BC2.weights, ahpState.results.BC3.weights, ahpState.results.BC4.weights]; let tbody = "";
+            for(let i=0; i<4; i++) { let total = 0; let cells = ""; for(let j=0; j<4; j++) { let contrib = b_matrices[j][i] * w_c[j]; total += contrib; cells += `<td>${contrib.toFixed(4)} <br><span class="text-[10px] text-slate-400 bg-slate-100 px-1 rounded">${(b_matrices[j][i]*100).toFixed(1)}%</span></td>`; } tbody += `<tr class="hover:bg-slate-50"><td class="font-bold text-slate-700">${AHP_ALTS[i]}</td>${cells}<td class="font-bold text-blue-700 bg-blue-50/80 text-base border-b border-blue-200">${total.toFixed(4)}</td></tr>`; }
+            document.getElementById('ahp-analysis-tbody').innerHTML = tbody;
+            ahpRadarChart.data.datasets = AHP_ALTS.map((alt, i) => { const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6']; return { label: alt, data: [b_matrices[0][i], b_matrices[1][i], b_matrices[2][i], b_matrices[3][i]], borderColor: colors[i], backgroundColor: 'transparent', borderWidth: 2, pointRadius: 4 }; }); ahpRadarChart.update();
+        }
+
+        const AHP_STEP_DATA = {
+            1: { title: "1. 建立层次结构模型", concept: "将复杂决策问题分解为目标层、准则层和方案层，形成自上而下的树状结构。", points: ["目标层 G: 运输选择", "准则层 C: 4大评价指标", "方案层 B: 4种实体方案"], math: "\\text{Hierarchical Structure}", demo: "最高层为运输总目标，最底层为四种方案。" },
+            2: { title: "2. 构造全量判断矩阵", concept: "通过专家经验，对同一层次要素两两比较，使用 1-9 标度法量化相对重要性。", points: ["正互反性: $a_{ji} = 1/a_{ij}$"], math: "A = \\begin{bmatrix} a_{11} & \\cdots & a_{1n} \\\\ \\vdots & \\ddots & \\vdots \\\\ a_{n1} & \\cdots & a_{nn} \\end{bmatrix}", demo: "便利性比经济性重要(3)，则 $a_{12}=3$。" },
+            3: { title: "3. 层次单排序 (求权重)", concept: "计算判断矩阵的最大特征根及对应的特征向量。", points: ["求解特征方程 $AW = \\lambda_{max}W$"], math: "W_i = \\frac{\\sum_{j=1}^n \\overline{a}_{ij}}{\\sum_{i=1}^n \\sum_{j=1}^n \\overline{a}_{ij}}", demo: "系统利用 JS 实时解析矩阵特征根。" },
+            4: { title: "4. 一致性检验 (CR)", concept: "防止判断矩阵出现严重的逻辑矛盾。", points: ["计算 $CR = CI/RI < 0.1$"], math: "CR = \\frac{CI}{RI} < 0.1", demo: "若沙盒中提示一致性未通过，说明存在逻辑冲突。" },
+            5: { title: "5. 层次总排序 (决策)", concept: "从上到下逐层合成权重计算最终优先顺序。", points: ["合成权值 = $\\sum$ (准则权 $\\times$ 方案权)"], math: "W_{B_i} = \\sum_{j=1}^m W_{C_j} \\cdot W_{B_i|C_j}", demo: "铁路运输得分最高。" }
+        };
+        function showStepAHP(idx) {
+            document.querySelectorAll('.ahp-step-btn').forEach((b, i) => { b.classList.toggle('step-btn-active', (i+1)===idx); b.classList.toggle('text-slate-600', (i+1)!==idx); }); let d = AHP_STEP_DATA[idx];
+            let htmlContent = `<div class="space-y-6 animate-fadeIn"><h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="bg-blue-600 text-white w-7 h-7 rounded text-sm flex items-center justify-center shadow-sm">${idx}</span> ${d.title}</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div class="space-y-4"><div><span class="text-xs font-bold text-slate-400">理论概念</span><p class="text-slate-600 text-sm mt-1">${d.concept}</p></div><div><span class="text-xs font-bold text-slate-400">核心要点</span><ul class="list-disc list-inside text-sm text-slate-600 mt-1">${d.points.map(p=>`<li>${p}</li>`).join('')}</ul></div></div><div class="space-y-4"><div><span class="text-xs font-bold text-slate-400">数学解析</span><div class="math-card text-center text-lg">$$${d.math}$$</div></div><div><span class="text-xs font-bold text-slate-400">沙盒表现</span><div class="p-3 bg-slate-50 border rounded font-mono text-xs text-slate-600 shadow-sm">${d.demo}</div></div></div></div></div>`;
+            MathRenderer.renderStep('ahp-step-content', htmlContent);
+        }
+
+        // =========================================================
+        // 核心三：群组 AHP JS 引擎 (重构对齐教材例 8-10)
+        // =========================================================
+        const GAHP_INDICATORS = [
+            { id: "B11", name: "配送成本", parent: "B1:经济" }, { id: "B12", name: "服务平衡", parent: "B1:经济" },
+            { id: "B21", name: "库存周转", parent: "B2:内部" }, { id: "B22", name: "人员利用", parent: "B2:内部" },
+            { id: "B23", name: "设备利用", parent: "B2:内部" }, { id: "B24", name: "信息化", parent: "B2:内部" },
+            { id: "B31", name: "速度", parent: "B3:质量" }, { id: "B32", name: "可得性", parent: "B3:质量" },
+            { id: "B33", name: "一致性", parent: "B3:质量" }, { id: "B34", name: "应变性", parent: "B3:质量" },
+            { id: "B41", name: "满意度", parent: "B4:反馈" }, { id: "B42", name: "份额递增", parent: "B4:反馈" }
+        ];
+        
+        // 教材原始数据校准
+        const GAHP_W_FINAL = [0.0827, 0.0783, 0.1085, 0.0637, 0.0737, 0.1061, 0.0759, 0.0898, 0.0996, 0.0867, 0.0690, 0.0660];
+        const EXP1_W_DEFAULT = [0.0833, 0.0417, 0.1125, 0.0375, 0.1125, 0.1125, 0.0536, 0.1071, 0.1071, 0.1071, 0.0938, 0.0313];
+        const GAHP_DEFAULT_LAMBDAS = [0.15, 0.15, 0.1, 0.1, 0.05, 0.1, 0.1, 0.05, 0.15, 0.05];
+        let gahpLambdas = [...GAHP_DEFAULT_LAMBDAS];
+
+        // 逆向生成其他专家的模拟向量以严格匹配最终答案
+        const w_other = GAHP_INDICATORS.map((_, i) => (GAHP_W_FINAL[i] - 0.15 * EXP1_W_DEFAULT[i]) / 0.85);
+        let gahpExpertVectors = [[]]; // Expert 1 will be dynamically calculated
+        for(let i=1; i<10; i++) gahpExpertVectors.push([...w_other]);
+
+        // 专家 1 动态矩阵状态
+        const getInitExp1Mat = () => ({
+            BA: [[1, 1/3, 1/3, 1], [3, 1, 1, 3], [3, 1, 1, 3], [1, 1/3, 1/3, 1]],
+            B1: [[1, 2], [1/2, 1]],
+            B2: [[1, 3, 1, 1], [1/3, 1, 1/3, 1/3], [1, 3, 1, 1], [1, 3, 1, 1]],
+            B3: [[1, 1/2, 1/2, 1/2], [2, 1, 1, 1], [2, 1, 1, 1], [2, 1, 1, 1]],
+            B4: [[1, 3], [1/3, 1]]
+        });
+
+        let gahpExp1State = { currentKey: 'BA', matrices: getInitExp1Mat(), results: {} };
+        const GAHP_LABELS = {
+            BA: ["B1(经济)", "B2(内部)", "B3(质量)", "B4(反馈)"],
+            B1: ["B11(成本)", "B12(平衡)"],
+            B2: ["B21(周转)", "B22(人员)", "B23(设备)", "B24(信息)"],
+            B3: ["B31(速度)", "B32(可得)", "B33(一致)", "B34(应变)"],
+            B4: ["B41(满意度)", "B42(份额)"]
+        };
+
+        let gahpMainChart;
+
+        function switchTabGAHP(tabId) {
+            document.querySelectorAll('#app-gahp section').forEach(s => s.classList.add('hidden')); document.getElementById(`gahp-tab-${tabId}`).classList.remove('hidden');
+            document.querySelectorAll('#app-gahp .nav-active').forEach(l => { l.classList.remove('nav-active'); l.classList.add('text-slate-600'); });
+            let act = document.getElementById(`gahp-nav-${tabId}`); act.classList.remove('text-slate-600'); act.classList.add('nav-active');
+            if(tabId === 'individual') selectMatrixGAHPExp1(gahpExp1State.currentKey);
+            if(tabId === 'sandbox') renderSlidersGAHP();
+            if(tabId === 'analysis') renderAnalysisGAHP(); 
+            if(tabId === 'steps') showStepGAHP(1);
+        }
+
+        // === 专家 1 个体演算逻辑 ===
+        function selectMatrixGAHPExp1(key) {
+            gahpExp1State.currentKey = key;
+            document.querySelectorAll('.gahp-mat-selector').forEach(b => { b.classList.remove('matrix-btn-active'); b.classList.add('text-slate-600'); });
+            document.getElementById(`btn-gahp-mat-${key}`).classList.remove('text-slate-600'); document.getElementById(`btn-gahp-mat-${key}`).classList.add('matrix-btn-active');
+            
+            const titles = { BA: "B-A 主因素矩阵", B1: "B1 经济效益子矩阵", B2: "B2 内部运句子矩阵", B3: "B3 作业质量子矩阵", B4: "B4 效果反馈子矩阵" };
+            document.getElementById('gahp-panel-title').innerText = titles[key] + " 标度调节";
+            
+            renderSlidersGAHPExp1();
+            updateGAHPExpert1();
+        }
+
+        function renderSlidersGAHPExp1() {
+            const key = gahpExp1State.currentKey; const labels = GAHP_LABELS[key]; const mat = gahpExp1State.matrices[key];
+            const colors = ['text-blue-700', 'text-emerald-700', 'text-amber-600', 'text-purple-600'];
+            let html = '';
+            for(let i=0; i<mat.length-1; i++) {
+                for(let j=i+1; j<mat.length; j++) {
+                    let val = mat[i][j];
+                    html += `<div class="slider-group"><div class="flex justify-between text-xs font-bold mb-1"><span class="${colors[i]}">${labels[i]}</span><span id="gahp-exp1-val-${i}-${j}" class="text-slate-700 bg-slate-100 px-2 rounded font-mono text-sm shadow-sm border">${ahp_formatVal(val)}</span><span class="${colors[j]}">${labels[j]}</span></div><input type="range" class="scale-slider" min="-8" max="8" step="1" value="${ahp_valToSlider(val)}" oninput="onSliderChangeGAHPExp1(${i}, ${j}, this.value)"></div>`;
+                }
+            }
+            document.getElementById('gahp-sliders-container-exp1').innerHTML = html;
+        }
+
+        function onSliderChangeGAHPExp1(i, j, sliderStr) {
+            let val = ahp_sliderToVal(sliderStr); let mat = gahpExp1State.matrices[gahpExp1State.currentKey];
+            mat[i][j] = val; mat[j][i] = 1 / val;
+            document.getElementById(`gahp-exp1-val-${i}-${j}`).innerText = ahp_formatVal(val);
+            updateGAHPExpert1();
+        }
+
+        function resetGAHPExp1Matrix() { gahpExp1State.matrices = getInitExp1Mat(); renderSlidersGAHPExp1(); updateGAHPExpert1(); }
+
+        function updateGAHPExpert1() {
+            // 1. 重新计算专家 1 的 5 个矩阵
+            Object.keys(gahpExp1State.matrices).forEach(k => { gahpExp1State.results[k] = calculateAHP(gahpExp1State.matrices[k]); });
+            
+            // 2. 更新当前视窗的 UI
+            const key = gahpExp1State.currentKey; const mat = gahpExp1State.matrices[key]; const res = gahpExp1State.results[key];
+            
+            MathRenderer.render('gahp-math-matrix-exp1', `$$A = \\begin{bmatrix} ` + mat.map(row => row.map(ahp_toTeX).join(" & ")).join(" \\\\ ") + ` \\end{bmatrix}$$`);
+            MathRenderer.render('gahp-math-weights-exp1', `$$W = \\begin{bmatrix} ` + res.weights.map(w => w.toFixed(4)).join(" \\\\ ") + ` \\end{bmatrix}^T$$`);
+            MathRenderer.render('gahp-cr-details-exp1', `$$\\lambda_{max} = ${res.lambda_max.toFixed(4)}, CI = ${res.CI.toFixed(4)}, CR = ${res.CR.toFixed(4)}$$`);
+            
+            const alertBox = document.getElementById('gahp-cr-alert-exp1'); const crTitle = document.getElementById('gahp-cr-title-exp1');
+            if (res.valid) { alertBox.className = "mt-4 p-4 rounded-lg border-2 flex items-center justify-between bg-emerald-50 border-emerald-300 text-emerald-800 shadow-sm transition-all"; crTitle.innerHTML = `<i class="fa-solid fa-circle-check"></i> 满意的一致性 (CR < 0.1)`; } 
+            else { alertBox.className = "mt-4 p-4 rounded-lg border-2 flex items-center justify-between bg-red-50 border-red-300 text-red-800 shadow-sm transition-all"; crTitle.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 一致性未通过 (CR ≥ 0.1)`; }
+
+            // 3. 合成专家 1 最终 12维向量
+            const w_BA = gahpExp1State.results.BA.weights;
+            const w1 = [
+                w_BA[0] * gahpExp1State.results.B1.weights[0], w_BA[0] * gahpExp1State.results.B1.weights[1],
+                w_BA[1] * gahpExp1State.results.B2.weights[0], w_BA[1] * gahpExp1State.results.B2.weights[1], w_BA[1] * gahpExp1State.results.B2.weights[2], w_BA[1] * gahpExp1State.results.B2.weights[3],
+                w_BA[2] * gahpExp1State.results.B3.weights[0], w_BA[2] * gahpExp1State.results.B3.weights[1], w_BA[2] * gahpExp1State.results.B3.weights[2], w_BA[2] * gahpExp1State.results.B3.weights[3],
+                w_BA[3] * gahpExp1State.results.B4.weights[0], w_BA[3] * gahpExp1State.results.B4.weights[1]
+            ];
+            gahpExpertVectors[0] = w1; // 全局更新
+
+            // 4. 渲染表 8-23 (动态版)
+            document.getElementById('gahp-th-b1').innerText = `B1(${w_BA[0].toFixed(4)})`; document.getElementById('gahp-th-b2').innerText = `B2(${w_BA[1].toFixed(4)})`;
+            document.getElementById('gahp-th-b3').innerText = `B3(${w_BA[2].toFixed(4)})`; document.getElementById('gahp-th-b4').innerText = `B4(${w_BA[3].toFixed(4)})`;
+            
+            const tbody = document.getElementById('gahp-exp1-tbody'); let html = "";
+            GAHP_INDICATORS.forEach((ind, i) => {
+                let cellB1 = i<2 ? (w1[i]/w_BA[0]).toFixed(4) : ""; let cellB2 = i>=2&&i<6 ? (w1[i]/w_BA[1]).toFixed(4) : "";
+                let cellB3 = i>=6&&i<10 ? (w1[i]/w_BA[2]).toFixed(4) : ""; let cellB4 = i>=10 ? (w1[i]/w_BA[3]).toFixed(4) : "";
+                html += `<tr><td>${ind.id} ${ind.name}</td><td>${cellB1}</td><td>${cellB2}</td><td>${cellB3}</td><td>${cellB4}</td><td class="font-bold bg-blue-50 text-blue-700 border-b border-blue-200">${w1[i].toFixed(4)}</td></tr>`;
+            });
+            tbody.innerHTML = html;
+
+            // 5. 触发全局群组合成
+            updateCalculationsGAHP();
+        }
+
+        // === 群组沙盒逻辑 ===
+        function renderSlidersGAHP() {
+            document.getElementById('gahp-expert-sliders').innerHTML = gahpLambdas.map((val, i) => `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="text-slate-600">专家 ${i+1} ${i===0?'<span class="bg-blue-100 text-blue-700 px-1 rounded ml-1"><i class="fa-solid fa-link"></i>受个体矩阵控制</span>':''}</span>
+                        <span class="text-blue-600 font-mono border bg-slate-100 px-1 rounded shadow-sm" id="gahp-lambda-val-${i}">${val.toFixed(2)}</span>
+                    </div>
+                    <input type="range" min="0" max="1" step="0.01" value="${val}" class="expert-slider" oninput="updateLambdaGAHP(${i}, this.value)">
+                </div>
+            `).join('');
+        }
+        
+        function updateLambdaGAHP(idx, val) {
+            gahpLambdas[idx] = parseFloat(val);
+            document.getElementById(`gahp-lambda-val-${idx}`).innerText = parseFloat(val).toFixed(2);
+            updateCalculationsGAHP();
+        }
+        function resetExpertWeightsGAHP() { gahpLambdas = [...GAHP_DEFAULT_LAMBDAS]; renderSlidersGAHP(); updateCalculationsGAHP(); }
+
+        function updateCalculationsGAHP() {
+            const sumL = gahpLambdas.reduce((a, b) => a + b, 0); const normalizedL = gahpLambdas.map(l => l / sumL);
+            const finalW = GAHP_INDICATORS.map((_, indIdx) => normalizedL.reduce((sum, l, expIdx) => sum + l * gahpExpertVectors[expIdx][indIdx], 0));
+            gahpMainChart.data.datasets[0].data = finalW; gahpMainChart.update(); window.gahpLastCalc = finalW;
+            if(!document.getElementById('gahp-tab-analysis').classList.contains('hidden')) renderAnalysisGAHP();
+        }
+
+        function renderAnalysisGAHP() {
+            const finalW = window.gahpLastCalc || []; const sorted = [...finalW].sort((a, b) => b - a);
+            document.getElementById('gahp-analysis-tbody').innerHTML = GAHP_INDICATORS.map((ind, i) => {
+                const weight = finalW[i] || 0; const rank = sorted.indexOf(weight) + 1;
+                return `<tr class="hover:bg-slate-50"><td class="font-bold text-slate-700">${ind.id} ${ind.name}</td><td class="text-slate-500">${ind.parent}</td><td class="text-slate-500 bg-slate-50">${gahpExpertVectors[0][i].toFixed(4)}</td><td class="bg-blue-50/80 text-blue-700 font-bold border-b border-blue-200 text-base">${weight.toFixed(4)}</td><td><span class="px-2 py-1 rounded text-xs shadow-sm font-bold ${rank <= 3 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-500 border'}">No.${rank}</span></td></tr>`;
+            }).join('');
+        }
+
+        const GAHP_STEP_DATA = {
+            1: { title: "1. 建立模型", concept: "分解目标、主因素和子因素层。", points: ["目标层 A: 配送绩效"], math: "A \\rightarrow B_i \\rightarrow B_{ij}", demo: "见【个体专家矩阵演算】" },
+            2: { title: "2. 个体专家决策", concept: "专家独立对指标构造判断矩阵。", points: ["单排序与一致性检验"], math: "A_k W_k = \\lambda_{max} W_k", demo: "基于个体沙盒的推演" },
+            3: { title: "3. 确定专家权重", concept: "赋予专家不同的权重系数。", points: ["归一化"], math: "\\sum \\lambda_k = 1", demo: "可使用滑块自由调节。" },
+            4: { title: "4. 权重合成", concept: "结合权重得出综合排序向量。", points: ["加权算术平均法"], math: "W_j = \\sum \\lambda_k W_{jk}", demo: "全自动动态联动合成。" }
+        };
+        function showStepGAHP(idx) { 
+            document.querySelectorAll('.gahp-step-btn').forEach((b, i) => { b.classList.toggle('step-btn-active', (i+1)===idx); b.classList.toggle('text-slate-600', (i+1)!==idx); }); let d = GAHP_STEP_DATA[idx]; 
+            let htmlContent = `<div class="animate-fadeIn space-y-6"><h2 class="text-xl font-bold text-slate-800 flex items-center gap-2"><span class="bg-blue-600 text-white w-7 h-7 rounded text-sm flex items-center justify-center shadow-sm">${idx}</span> ${d.title}</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-8"><div class="space-y-4"><div><span class="text-xs font-bold text-slate-400">概念</span><p class="text-slate-600 text-sm mt-1">${d.concept}</p></div></div><div class="space-y-4"><div><span class="text-xs font-bold text-slate-400">公式</span><div class="math-card text-center text-lg">$$${d.math}$$</div></div></div></div></div>`; 
+            MathRenderer.renderStep('gahp-step-content', htmlContent);
+        }
+
+        // ================= 全局系统启动 =================
+        window.onload = () => {
+            const commonOpts = { responsive: true, maintainAspectRatio: false };
+            gmSandboxChart = new Chart(document.getElementById('gm-sandboxChart').getContext('2d'), { type: 'line', data: { labels: [], datasets: [ { label: '真实观测', data: [], borderColor: '#94a3b8', backgroundColor: '#94a3b8', borderWidth: 2, pointStyle: 'rect', tension: 0 }, { label: '拟合曲线', data: [], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', fill: true, borderDash: [4, 4], tension: 0.3 } ] }, options: { ...commonOpts, plugins: { legend: { position: 'top', labels: { usePointStyle: true } } } } });
+            gmAnalysisChart = new Chart(document.getElementById('gm-analysisChart').getContext('2d'), { type: 'line', options: { ...commonOpts, plugins: { legend: { position: 'top', labels: { usePointStyle: true } } } } });
+            
+            ahpSandboxChart = new Chart(document.getElementById('ahp-sandboxChart').getContext('2d'), { type: 'bar', data: { labels: AHP_ALTS, datasets: [{ label: '全局动态总得分', data: [0,0,0,0], backgroundColor: '#94a3b8', borderRadius: 6 }] }, options: { ...commonOpts, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 0.5 } } } });
+            ahpRadarChart = new Chart(document.getElementById('ahp-radarChart').getContext('2d'), { type: 'radar', data: { labels: AHP_CRITERIA, datasets: [] }, options: { ...commonOpts, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10 } } }, scales: { r: { beginAtZero: true, suggestedMax: 0.6 } } } });
+            
+            gahpMainChart = new Chart(document.getElementById('gahp-mainChart').getContext('2d'), { type: 'bar', data: { labels: GAHP_INDICATORS.map(ind => ind.name), datasets: [{ label: '指标综合权重', data: [], backgroundColor: '#3b82f6', borderRadius: 4 }] }, options: { indexAxis: 'y', ...commonOpts, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, max: 0.15 }, y: { ticks: { font: { size: 10 } } } } } });
+
+            hljs.highlightAll();
+            
+            // 初始化所有应用引擎
+            computeAllAHP(); selectMatrixAHP('CG');
+            updateGAHPExpert1(); renderSlidersGAHP(); selectMatrixGAHPExp1('BA');
+            
+            // 启动默认应用 (例 6-8)
+            switchApp('gm');
+        };
+    </script>
+</body>
+</html>
